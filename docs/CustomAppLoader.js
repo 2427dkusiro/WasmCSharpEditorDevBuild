@@ -1,9 +1,7 @@
 ﻿import { BrotliDecode } from './decode.min.js';
-// import { Base64Decode } from "./Base64Decode.js";
 
 Blazor.start({
     loadBootResource: function (type, name, defaultUri, integrity) {
-        return;
         // this means app is in debug mode.
         if (location.hostname == "localhost" && location.port != "5500") {
             const span = document.getElementById("ProgressLoadMode");

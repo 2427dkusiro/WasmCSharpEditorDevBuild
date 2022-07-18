@@ -16,13 +16,12 @@ async function onInstall(event) {
 
     // service workerの更新を即適用
     event.waitUntil(self.skipWaiting());
-    /*
+
     const assetsRequests = self.assetsManifest.assets
         .filter(asset => offlineAssetsInclude.some(pattern => pattern.test(asset.url)))
         .filter(asset => !offlineAssetsExclude.some(pattern => pattern.test(asset.url)))
-        .map(asset => new Request(asset.url + ".br")); // ハッシュ照合を無効化、代替手法の検討必要か?
+        .map(asset => asset.url.startsWith("_framework") ? new Request(asset.url + ".br") : new Request(asset.url)); // ハッシュ照合を無効化、代替手法の検討必要か?
     await caches.open(cacheName).then(cache => cache.addAll(assetsRequests));
-    */
 }
 
 async function onActivate(event) {
@@ -30,12 +29,11 @@ async function onActivate(event) {
 
     // service workerを初回から有効化
     event.waitUntil(self.clients.claim());
-    /*
+
     const cacheKeys = await caches.keys();
     await Promise.all(cacheKeys
         .filter(key => key.startsWith(cacheNamePrefix) && key !== cacheName)
         .map(key => caches.delete(key)));
-    */
 }
 
 async function onFetch(event) {
@@ -44,10 +42,10 @@ async function onFetch(event) {
         let response = await GetSpecialResponse(event.request);
         return response;
     }
-    return await fetch(event.request);
+    // return await fetch(event.request);
+
     // GETならば圧縮/キャッシュによる転送量削減アプローチを検討
-    // let cachedResponse = null;
-    /*
+    let cachedResponse = null;
     if (event.request.method === 'GET') {
         const shouldServeIndexHtml = event.request.mode === 'navigate';
         const requestUrl = (shouldServeIndexHtml ? 'index.html' : event.request.url);
@@ -55,7 +53,7 @@ async function onFetch(event) {
 
         let decodeRequired = false;
         // 圧縮済みを要求していなければ、圧縮へ書き換え
-        if (!requestUrl.endsWith(".br")) {
+        if (requestUrl.includes("_framework") && !requestUrl.endsWith(".br")) {
             decodeRequired = true;
             reWritedUrl = requestUrl + ".br";
         }
@@ -74,8 +72,7 @@ async function onFetch(event) {
         }
         cachedResponse = response;
     }
-    */
-    // return cachedResponse || await fetch(event.request);
+    return cachedResponse || await fetch(event.request);
 }
 
 function getMIMEType(url) {
@@ -100,5 +97,4 @@ function getMIMEType(url) {
     if (url.endsWith(".woff")) {
         return "font/woff";
     }
-}
-/* Manifest version: nVg+Yts8 */
+}/* Manifest version: 2x0TkI6q */
